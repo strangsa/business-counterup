@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🏨 Hotels</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.0.8/countUp.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Oswald', sans-serif;
+      background-color: #2e2e2e;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+    }
+    .label {
+      font-size: 18px;
+    }
+    .count {
+      font-size: 42px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="label">🏨 Hotels</div>
+  <div class="count" id="counter">0</div>
+
+  <script>
+    function updateCountFromExtent() {
+      const params = new URLSearchParams(window.location.search);
+      const xmin = params.get('xmin');
+      const ymin = params.get('ymin');
+      const xmax = params.get('xmax');
+      const ymax = params.get('ymax');
+
+      let url = 'https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/2024_Safegraph_Hotels/FeatureServer/0/query?where=1=1&returnCountOnly=true&f=json';
+
+      if (xmin && ymin && xmax && ymax) {
+        const geometry = `{"xmin":${xmin},"ymin":${ymin},"xmax":${xmax},"ymax":${ymax},"spatialReference":{"wkid":4326}}`;
+        url += `&geometry=${encodeURIComponent(geometry)}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects`;
+      }
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const count = data.count || 0;
+          const counter = new CountUp('counter', count, {
+            duration: 1.5,
+            useGrouping: true,
+            separator: ','
+          });
+          if (!counter.error) {
+            counter.start();
+          } else {
+            console.error(counter.error);
+          }
+        });
+    }
+
+    updateCountFromExtent();
+  </script>
+</body>
+</html>
